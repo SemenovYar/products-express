@@ -1,0 +1,5 @@
+{
+  "port": 3000,
+  "host": "localhost",
+  "dbLink": "mongodb+srv://yar:y1a2r3@cluster0-yhbn4.gcp.mongodb.net/crudProducts"
+}
