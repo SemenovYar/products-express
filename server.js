@@ -2,22 +2,20 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const app = express();
-const port = 3000;
-const config = 'mongodb+srv://yar:y1a2r3@cluster0-yhbn4.gcp.mongodb.net/crudProducts';
-const ProductController = require('./controllers/product-crud-controllers');
-app.use(bodyParser.urlencoded({extended: true}));
+const config = require('./configs');
+const routes = require('./routes');
 
 async function start() {
   try {
-    await mongoose.connect(config,
+    await mongoose.connect(config.get('dbLink'),
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useFindAndModify: false
       });
     console.log('MongoDb connected');
-    app.listen(port, () => {
-      console.log('Server has been started on port: ' + port)
+    app.listen(config.get('port'), config.get('host'), () => {
+      console.log("Server start on " + config.get('host') + ":" + config.get('port'));
     });
   }
   catch (e) {
@@ -25,15 +23,10 @@ async function start() {
   }
 }
 
-app.get('/', function (req,res) {
-  console.log(req.session);
-  res.send("Hello API");
-});
+// Middlewares
+app.use(bodyParser.urlencoded({extended: true}));
 
-app.get('/products', ProductController.all);
-app.post('/products', ProductController.create);
-app.get('/products/:id', ProductController.findById);
-app.put('/products/:id', ProductController.update);
-app.delete('/products/:id', ProductController.delete);
+// Routes
+app.use('/api/products', routes.api.products);
 
 start();

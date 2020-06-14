@@ -1,6 +1,22 @@
 const Product = require('../models/product-crud-model');
+const ProductSchema = require('../models/product-schema');
 exports.all = (req, res) => {
   Product.all((err, docs) => {
+    if(err){
+      console.log(err);
+      return res.status(500)
+    }
+    res.send(docs)
+  })
+};
+
+exports.allWithPaginate = (req, res) => {
+  const {page, perPage} = req.query;
+  const options = {
+    page: parseInt(page, 10) || 1,
+    limit: parseInt(perPage, 10) || 10
+  };
+  ProductSchema.paginate({}, options,(err, docs) => {
     if(err){
       console.log(err);
       return res.status(500)
