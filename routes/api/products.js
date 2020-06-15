@@ -3,6 +3,8 @@ const productController = require('../../controllers/product-crud-controllers');
 
 router.get('/all', productController.all);
 router.get('/paginate', productController.allWithPaginate);
+router.get('/filter', productController.filterByPrice);
+router.get('/find', productController.findByString);
 router.post('/create', productController.create);
 router.get('/find/:id', productController.findById);
 router.put('/update/:id', productController.update);

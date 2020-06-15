@@ -1,5 +1,6 @@
 const Product = require('../models/product-crud-model');
 const ProductSchema = require('../models/product-schema');
+
 exports.all = (req, res) => {
   Product.all((err, docs) => {
     if(err){
@@ -24,6 +25,75 @@ exports.allWithPaginate = (req, res) => {
     res.send(docs)
   })
 };
+
+// exports.filterByPrice = (req, res) => {
+//   const {minPrice, maxPrice} = req.query;
+//   const option = {price: {}};
+//
+//   if(minPrice){
+//     option.price.$gte = parseInt(minPrice);
+//   }
+//   if (maxPrice) {
+//     option.price.$lte = parseInt(maxPrice);
+//   }
+//
+//   ProductSchema.find(option,(err, docs) => {
+//     if(err){
+//       console.log(err);
+//       return res.status(500)
+//     }
+//     res.send(docs)
+//   })
+//     //.sort({weight: -1}) //сортировка по убыванию
+// };
+
+exports.filterByPrice = (req, res) => {
+  const {minPrice, maxPrice} = req.query;
+
+  ProductSchema
+    .find()
+    .where('price')
+    .gte(minPrice || 0 ).lte(maxPrice || 1000000 ) // попытался оптимизировать, но не знаю принято ли так у бэкендщиков =)
+    .sort('price')
+    .exec((err, docs) => {
+    if(err){
+      console.log(err);
+      return res.status(500)
+    }
+    res.send(docs)
+  });
+};
+
+
+// exports.findByString = (req,res) => {
+//   const {string} = req.query;
+//   const regString = { $regex: string, $options: "ig" };
+//   ProductSchema
+//     .find({$or: [{ title: regString }, { body: regString }] })
+//     //.sort(score)
+//     .exec((err, docs) => {
+//     if(err){
+//       console.log(err);
+//       return res.status(500)
+//     }
+//     res.send(docs)
+//   });
+// };
+
+exports.findByString = (req,res) => {
+  const {string} = req.query;
+  ProductSchema
+    .find({$text: {$search: string}}, {score: {$meta:"textScore"}})
+    .sort({score: {$meta:"textScore"}})
+    .exec((err, docs) => {
+      if(err){
+        console.log(err);
+        return res.status(500)
+      }
+      res.send(docs)
+    });
+};
+
 
 exports.create = (req, res) => {
   const product = {
